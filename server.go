@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -13,9 +14,11 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/pair-device", PairDeviceHandler).Methods(http.MethodPost)
 
+	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
+	fmt.Println("addr: ", addr)
 	server := http.Server{
-		Addr:              ":2009",
-		Handler:           r,
+		Addr:    addr,
+		Handler: r,
 	}
 
 	log.Println("starting...")
