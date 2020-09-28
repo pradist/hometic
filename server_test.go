@@ -20,15 +20,18 @@ func TestPairDeviceHandler(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 
-	orgin := createPairDevice
-	defer func() {
-		createPairDevice = orgin
-	}()
-	createPairDevice = func(p Pair) error {
-		return nil
-	}
+	//orgin := createPairDevice
+	//defer func() {
+	//	createPairDevice = orgin
+	//}()
+	//createPairDevice = func(p Pair) error {
+	//	return nil
+	//}
 
-	PairDeviceHandler(rec, req)
+	handler := &PairDeviceHandler{func(p Pair) error {
+		return nil
+	}}
+	handler.ServeHTTP(rec, req)
 
 	if http.StatusOK != rec.Code {
 		t.Error("Expect 200 OK but get", rec.Code)
