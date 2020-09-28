@@ -34,8 +34,8 @@ func main() {
 }
 
 func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
-	var pair Pair
-	err := json.NewDecoder(r.Body).Decode(&pair)
+	var p Pair
+	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())
@@ -43,23 +43,27 @@ func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err.Error())
-		return
-	}
-	defer db.Close()
 
-	insertQuery := `INSERT INTO pairs VALUES ($1, $2);`
 
-	_, err = db.Exec(insertQuery, pair.DeviceID, pair.UserID)
+	err = createPairDevice(p)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 
-	fmt.Printf("pair : %#v\n", pair)
+	fmt.Printf("pair : %#v\n", p)
 	w.Write([]byte(`{"status":"active"}`))
 }
+
+var createPairDevice = func(p Pair) error {
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec("INSERT INTO pairs VALUES ($1, $2);", p.DeviceID, p.UserID)
+	return err
+}
+
+
