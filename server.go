@@ -60,7 +60,7 @@ func (ph *PairDeviceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type CreatePairDevice = func(p Pair) error
 
-var createPairDevice = func(p Pair) error {
+func createPairDevice(p Pair) error {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
