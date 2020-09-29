@@ -20,7 +20,7 @@ func main() {
 	fmt.Println("Hello")
 
 	r := mux.NewRouter()
-	r.Handle("/pair-device", &PairDeviceHandler{createPairDevice}).Methods(http.MethodPost)
+	r.Handle("/pair-device", PairDeviceHandler(createPairDevice)).Methods(http.MethodPost)
 
 	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
 	fmt.Println("addr: ", addr)
@@ -33,29 +33,27 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-type PairDeviceHandler struct {
-	createPairDevice CreatePairDevice
-}
+func PairDeviceHandler(createPairDevice CreatePairDevice) http.HandlerFunc {
+	return func (w http.ResponseWriter, r *http.Request) {
+		var p Pair
+		err := json.NewDecoder(r.Body).Decode(&p)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(err.Error())
+			return
+		}
+		defer r.Body.Close()
 
-func (ph *PairDeviceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var p Pair
-	err := json.NewDecoder(r.Body).Decode(&p)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err.Error())
-		return
+		err = createPairDevice(p)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(err.Error())
+			return
+		}
+
+		fmt.Printf("pair : %#v\n", p)
+		w.Write([]byte(`{"status":"active"}`))
 	}
-	defer r.Body.Close()
-
-	err = ph.createPairDevice(p)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err.Error())
-		return
-	}
-
-	fmt.Printf("pair : %#v\n", p)
-	w.Write([]byte(`{"status":"active"}`))
 }
 
 type CreatePairDevice = func(p Pair) error
