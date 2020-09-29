@@ -60,7 +60,7 @@ type Device interface {
 	Pair(p Pair) error
 }
 
-type CreatePairDevice = func(p Pair) error
+//type CreatePairDevice = func(p Pair) error
 
 type createPairDevice struct {
 }
