@@ -46,6 +46,7 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 		l := zap.NewExample()
 		l = l.With(zap.Namespace("hometicx"), zap.String("I'm", "Gopher"))
 		l.Info("pair-device")
+
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
