@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	"go.uber.org/zap"
+	"github.com/pradist/hometic/logger"
 	"log"
 	"net/http"
 	"os"
@@ -26,8 +26,8 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	create := NewCreatePairDevice(db)
-	r.Handle("/pair-device", PairDeviceHandler(create)).Methods(http.MethodPost)
+	r.Use(logger.Middleware)
+	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
 	fmt.Println("addr: ", addr)
@@ -42,10 +42,7 @@ func main() {
 
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func (w http.ResponseWriter, r *http.Request) {
-
-		l := zap.NewExample()
-		l = l.With(zap.Namespace("hometicx"), zap.String("I'm", "Gopher"))
-		l.Info("pair-device")
+		logger.L(r.Context()).Info("pair-device")
 
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
