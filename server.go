@@ -97,7 +97,11 @@ func (fn CreatePairDeviceFunc) Pair(p Pair) error {
 	return fn(p)
 }
 
-func NewCreatePairDevice(db *sql.DB) CreatePairDeviceFunc {
+type DB interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+func NewCreatePairDevice(db DB) CreatePairDeviceFunc {
 	return func(p Pair) error {
 		_, err := db.Exec("INSERT INTO pairs VALUES ($1, $2);", p.DeviceID, p.UserID)
 		return err
