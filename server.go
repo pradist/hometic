@@ -18,8 +18,13 @@ type Pair struct {
 }
 
 func main() {
-	fmt.Println("Hello")
+	if err := run(); err != nil {
+		log.Fatal("Can't start application ", err)
+	}
+}
 
+func run() error {
+	fmt.Println("Hello hometic: I'm gopher!!!")
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +42,7 @@ func main() {
 	}
 
 	log.Println("starting...")
-	log.Fatal(server.ListenAndServe())
+	return server.ListenAndServe()
 }
 
 type CustomHandleFunc func(w CustomResponseWriter, r *http.Request)
